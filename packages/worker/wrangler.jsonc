@@ -7,11 +7,23 @@
 		"directory": "../../dist",
 		"binding": "ASSETS",
 		"not_found_handling": "single-page-application",
-		"run_worker_first": ["/api/*", "/r/*"]
+		"run_worker_first": [
+			"/api/*",
+			"/r/*"
+		]
 	},
+	"preview_urls": false,
+	"workers_dev": false,
 	"kv_namespaces": [
 		{
-			"binding": "REDIRECTS"
+			"binding": "REDIRECTS",
+			"id": "53717a30c9ef43ce9ee1394a25811923"
+		}
+	],
+	"routes": [
+		{
+			"pattern": "q.eyemono.moe/*",
+			"zone_id": "3c1e452f53056bb66612310c265058c9"
 		}
 	]
 }
