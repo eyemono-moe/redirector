@@ -26,8 +26,8 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use("*", logger());
 app.use("*", clerkMiddleware());
 
-// ─── リダイレクト /:id ────────────────────────────────────────────────────────
-app.get("/:id", async (c) => {
+// ─── リダイレクト /:id ───────────────────────────────────────────────────
+app.get("/r/:id", async (c) => {
 	const id = c.req.param("id");
 
 	// admin は管理画面へ（静的アセットに処理を委譲）
@@ -44,7 +44,7 @@ app.get("/:id", async (c) => {
 	return c.redirect(destination, 302);
 });
 
-// ─── 管理 API（Clerk JWT 検証） ────────────────────────────────────────────────
+// ─── 管理 API（Clerk JWT 検証） ──────────────────────────────────────────
 
 // 認証チェックミドルウェア
 const factory = createFactory<{ Bindings: Bindings }>();
@@ -138,7 +138,10 @@ app.delete(
 	},
 );
 
-// ─── ルート ───────────────────────────────────────────────────────────────────
+// ─── ルート ──────────────────────────────────────────────────────────────
 app.get("/", (c) => c.redirect("/admin/", 301));
+
+// ─── その他のルートは静的アセットに委譲 ───────────────────────────────────────
+app.all("*", (c) => c.env.ASSETS.fetch(c.req.raw));
 
 export default app;

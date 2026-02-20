@@ -166,7 +166,7 @@ export default function Dashboard() {
 							className="p-3 border border-gray-300 rounded-lg flex items-center justify-between"
 						>
 							<span>
-								<strong className="font-mono">{r.id}</strong> → {r.destination}
+								<strong className="font-mono">{document.location.origin}/r/{r.id}</strong> → {r.destination}
 							</span>
 							<button
 								type="button"
