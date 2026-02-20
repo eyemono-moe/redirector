@@ -1,0 +1,16 @@
+{
+  "name": "redirector",
+  "private": true,
+  "scripts": {
+    "dev:worker": "pnpm --filter worker dev",
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "dev": "pnpm -r --parallel dev",
+    "build:worker": "pnpm --filter worker build",
+    "build:dashboard": "pnpm --filter dashboard build",
+    "build": "pnpm build:dashboard && pnpm build:worker",
+    "deploy": "pnpm build && pnpm --filter worker deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

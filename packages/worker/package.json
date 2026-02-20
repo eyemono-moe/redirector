@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "@clerk/backend": "^2.31.2",
+    "@hono/clerk-auth": "^3.1.0",
+    "@hono/standard-validator": "^0.2.2",
+    "@hono/valibot-validator": "^0.6.1",
+    "hono": "^4.12.0",
+    "shared": "workspace:*",
+    "valibot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260227.0",
+    "wrangler": "^4.17.0"
+  },
+  "name": "worker",
+  "private": true,
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir=dist",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "type": "module"
+}
