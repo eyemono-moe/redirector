@@ -46,6 +46,7 @@ cd packages/worker && pnpm cf-typegen
 ## Architecture
 
 ### Tech Stack
+
 - **Monorepo**: pnpm workspace
 - **Backend Runtime**: Cloudflare Workers
 - **Backend Framework**: Hono
@@ -85,19 +86,18 @@ The worker logic is in `packages/worker/src/index.ts`. It defines a Hono app wit
    - `REDIRECTS`: KV namespace for storing redirect mappings
    - `CLERK_PUBLISHABLE_KEY`: Clerk public key
    - `CLERK_SECRET_KEY`: Clerk secret key
-   - `ALLOWED_EMAILS`: Comma-separated list of email addresses allowed to access admin features (e.g., "user1@example.com,user2@example.com")
+   - `ALLOWED_EMAILS`: Comma-separated list of email addresses allowed to access admin features (e.g., "<user1@example.com>,<user2@example.com>")
    - `ASSETS`: Fetcher binding for static assets (Dashboard build output)
 
 2. **Route Order** (important for correct behavior):
    - `/` → redirects to `/admin/`
-   - `/:id` → redirect lookup with special handling:
-     - If `id === 'admin'`: delegates to static assets via `c.env.ASSETS.fetch(c.req.raw)`
-     - Otherwise: performs redirect lookup in KV
+   - `/r/:id` → redirect lookup in KV
    - `/api/*` → authenticated admin API endpoints
+   - Other routes → delegated to static assets (React SPA)
 
 3. **Workers Static Assets Configuration** (`packages/worker/wrangler.jsonc`):
    - `assets.directory`: `../../dist` (Dashboard build output)
-   - `assets.run_worker_first`: `["/api/*", "/:id"]` - Worker handles API and redirects first
+   - `assets.run_worker_first`: `["/", "/api/*", "/r/*"]` - Worker processes these routes before serving static assets
    - `assets.not_found_handling`: `"single-page-application"` - SPA routing support
 
 4. **Authentication Flow**:
@@ -131,12 +131,9 @@ React SPA for managing redirects:
 
 ### Key Implementation Details
 
-- **URL Validation**: Only `http:` and `https:` protocols are accepted for destination URLs (see `isValidUrl()` at packages/worker/src/index.ts:106)
+- **URL Validation**: Only `http:` and `https:` protocols are accepted for destination URLs
 - **ID Constraints**: Redirect IDs must match `/^[a-zA-Z0-9_-]+$/` pattern
-- **Static Assets Delegation**: The route `/:id` delegates to `c.env.ASSETS.fetch()` when `id === 'admin'` to serve the React SPA
-- **Environment Variables**:
-  - Worker: `packages/worker/.dev.vars` (CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY)
-  - Dashboard: `packages/dashboard/.env.local` (VITE_CLERK_PUBLISHABLE_KEY)
+- **Static Assets Delegation**: Routes not matching `/`, `/r/*`, or `/api/*` are served by static assets (React SPA)
 
 ### Cloudflare Workers Configuration
 
@@ -144,18 +141,73 @@ React SPA for managing redirects:
 - Compatibility date: `2025-08-03`
 - Configuration file: `packages/worker/wrangler.jsonc`
 
-### Authorization Configuration
+### Environment Variables Management
 
-To modify which users can access admin features, update the `ALLOWED_EMAILS` environment variable:
+#### Required Environment Variables
 
-**Development** (`packages/worker/.dev.vars`):
-```
-ALLOWED_EMAILS=admin@example.com,another@example.com
-```
+The Worker requires the following environment variables:
 
-**Production**:
+- `CLERK_PUBLISHABLE_KEY`: Clerk publishable key (public, can be in vars)
+- `CLERK_SECRET_KEY`: Clerk secret key (sensitive, managed as secret)
+- `ALLOWED_EMAILS`: Comma-separated list of allowed email addresses (e.g., "<user1@example.com>,<user2@example.com>")
+
+#### Local Development Setup
+
+1. Copy the example environment file:
+
+   ```bash
+   cp packages/worker/.env.local.example packages/worker/.env.local
+   ```
+
+2. Edit `packages/worker/.env.local` with your actual values:
+
+   ```bash
+   CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ALLOWED_EMAILS=admin@example.com,another@example.com
+   ```
+
+3. For the Dashboard, create `packages/dashboard/.env.local`:
+
+   ```bash
+   VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+
+**Note**: `.env.local` is gitignored and should never be committed.
+
+#### Production Deployment (GitHub Actions)
+
+Environment variables for production are managed through **GitHub Secrets** to prevent them from being overwritten during CI/CD deployments.
+
+**Why GitHub Secrets?**
+When deploying via `wrangler deploy`, any environment variables not defined in `wrangler.jsonc` or passed via the deployment process will be **removed** from the Worker. This means manually setting variables in the Cloudflare dashboard will result in them being deleted on the next deployment.
+
+**Setup GitHub Secrets:**
+
+1. Go to your GitHub repository → Settings → Secrets and variables → Actions
+2. Add the following secrets:
+   - `CLERK_PUBLISHABLE_KEY`: Your production Clerk publishable key
+   - `CLERK_SECRET_KEY`: Your production Clerk secret key
+   - `ALLOWED_EMAILS`: Comma-separated list of allowed emails
+   - `VITE_CLERK_PUBLISHABLE_KEY`: Same as CLERK_PUBLISHABLE_KEY (for Dashboard build)
+   - `CLOUDFLARE_API_TOKEN`: Your Cloudflare API token
+   - `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
+
+The GitHub Actions workflow (`.github/workflows/deploy.yml`) automatically:
+
+- Sets `CLERK_PUBLISHABLE_KEY` as a var
+- Sets `CLERK_SECRET_KEY` and `ALLOWED_EMAILS` as encrypted secrets
+
+**Manual Secret Management** (if needed):
+
+To manually update secrets in production:
+
 ```bash
 cd packages/worker
-wrangler secret put ALLOWED_EMAILS
-# Enter comma-separated email addresses when prompted
+
+# Update individual secrets
+echo "sk_live_xxxxx" | wrangler secret put CLERK_SECRET_KEY
+echo "admin@example.com,user@example.com" | wrangler secret put ALLOWED_EMAILS
 ```
+
+To modify which users can access admin features, update the `ALLOWED_EMAILS` GitHub Secret or use the manual method above.
