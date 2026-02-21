@@ -46,6 +46,9 @@ app.get("/r/:id", async (c) => {
 
 // ─── 管理 API（Clerk JWT 検証） ──────────────────────────────────────────
 
+// ClerkClientをキャッシュ
+let cachedClerkClient: ReturnType<typeof createClerkClient> | null = null;
+
 // 認証チェックミドルウェア
 const factory = createFactory<{ Bindings: Bindings }>();
 const requireAuth = factory.createMiddleware(async (c, next) => {
@@ -55,7 +58,7 @@ const requireAuth = factory.createMiddleware(async (c, next) => {
 		return c.json({ error: "Unauthorized: Not authenticated" }, 401);
 	}
 
-	// 許可されたメールアドレスのリストを環境変数から取得（カンマ区切り）
+	// 許可されたメールアドレスのリストを取得（カンマ区切り）
 	const allowedEmailsStr = c.env.ALLOWED_EMAILS || "";
 	const allowedEmails = allowedEmailsStr
 		.split(",")
@@ -66,10 +69,13 @@ const requireAuth = factory.createMiddleware(async (c, next) => {
 		return c.json({ error: "Unauthorized: No allowed emails configured" }, 500);
 	}
 
-	// Clerkクライアントを作成してユーザー情報を取得
-	const clerkClient = createClerkClient({
-		secretKey: c.env.CLERK_SECRET_KEY,
-	});
+	// Clerkクライアントを取得（初回のみ作成、以降はキャッシュ）
+	if (!cachedClerkClient) {
+		cachedClerkClient = createClerkClient({
+			secretKey: c.env.CLERK_SECRET_KEY,
+		});
+	}
+	const clerkClient = cachedClerkClient;
 
 	try {
 		const user = await clerkClient.users.getUser(auth.userId);
