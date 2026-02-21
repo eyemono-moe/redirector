@@ -143,6 +143,33 @@ app.post(
 	},
 );
 
+// リダイレクト更新
+app.put(
+	"/api/redirects/:id",
+	requireAuth,
+	sValidator("json", CreateRedirectSchema),
+	sValidator("param", v.object({ id: RedirectIdSchema })),
+	async (c) => {
+		const { id } = c.req.valid("param");
+		const { destination } = c.req.valid("json");
+
+		// 既存のIDが存在しない場合はエラー
+		const existing = await c.env.REDIRECTS.get(id);
+		if (!existing) {
+			return c.json(
+				{
+					error: "Not Found: Redirect ID does not exist",
+				},
+				404,
+			);
+		}
+
+		await c.env.REDIRECTS.put(id, destination);
+
+		return c.json({ id, destination });
+	},
+);
+
 // リダイレクト削除
 app.delete(
 	"/api/redirects/:id",

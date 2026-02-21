@@ -28,6 +28,24 @@ export async function createRedirect(
 	return res.json();
 }
 
+export async function updateRedirect(
+	id: string,
+	data: CreateRedirect,
+): Promise<Redirect> {
+	const res = await fetch(`${API_BASE}/redirects/${id}`, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(data),
+	});
+
+	if (!res.ok) {
+		const error = await res.json();
+		throw new Error(error.error || "Failed to update redirect");
+	}
+
+	return res.json();
+}
+
 export async function deleteRedirect(id: string): Promise<void> {
 	const res = await fetch(`${API_BASE}/redirects/${id}`, {
 		method: "DELETE",
