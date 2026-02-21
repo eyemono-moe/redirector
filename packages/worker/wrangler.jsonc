@@ -22,8 +22,8 @@
 	],
 	"routes": [
 		{
-			"pattern": "q.eyemono.moe/*",
-			"zone_id": "3c1e452f53056bb66612310c265058c9"
+			"custom_domain": true,
+			"pattern": "q.eyemono.moe",
 		}
 	]
 }
