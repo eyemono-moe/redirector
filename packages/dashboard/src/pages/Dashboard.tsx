@@ -7,7 +7,9 @@ import {
 	createRedirect,
 	deleteRedirect,
 	fetchRedirects,
+	updateRedirect,
 } from "../api/redirects";
+import { RedirectListItem } from "../components/RedirectListItem";
 
 const CreateRedirectFormSchema = v.object({
 	id: RedirectIdSchema,
@@ -35,6 +37,14 @@ export default function Dashboard() {
 		},
 	});
 
+	const updateMutation = useMutation({
+		mutationFn: ({ id, destination }: { id: string; destination: string }) =>
+			updateRedirect(id, { destination }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["redirects"] });
+		},
+	});
+
 	const deleteMutation = useMutation({
 		mutationFn: deleteRedirect,
 		onSuccess: () => {
@@ -55,13 +65,21 @@ export default function Dashboard() {
 		},
 	});
 
+	const handleUpdate = async (id: string, destination: string) => {
+		try {
+			await updateMutation.mutateAsync({ id, destination });
+		} catch (error) {
+			console.error("Failed to update redirect:", error);
+			throw error;
+		}
+	};
+
 	const handleDelete = async (id: string) => {
-		if (!confirm(`Delete redirect "${id}"?`)) return;
 		try {
 			await deleteMutation.mutateAsync(id);
 		} catch (error) {
 			console.error("Failed to delete redirect:", error);
-			alert("Failed to delete redirect");
+			throw error;
 		}
 	};
 
@@ -194,70 +212,16 @@ export default function Dashboard() {
 						</p>
 					) : (
 						<ul className="space-y-3">
-							{redirects.map((r) => {
-								const shortUrl = `${document.location.origin}/r/${r.id}`;
-								return (
-									<li
-										key={r.id}
-										className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
-									>
-										<div className="flex flex-col gap-3">
-											<div className="flex items-start gap-2">
-												<div className="flex-1 min-w-0">
-													<div className="text-xs text-gray-500 mb-1">
-														Short URL
-													</div>
-													<div className="font-mono text-sm text-blue-600 font-medium break-all">
-														{shortUrl}
-													</div>
-												</div>
-												<button
-													type="button"
-													onClick={() => {
-														navigator.clipboard.writeText(shortUrl);
-													}}
-													className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex-shrink-0"
-													title="Copy URL"
-												>
-													Copy
-												</button>
-											</div>
-
-											<div className="flex items-start gap-2">
-												<div className="flex-1 min-w-0">
-													<div className="text-xs text-gray-500 mb-1">
-														Destination
-													</div>
-													<div className="text-sm text-gray-700 break-all">
-														{r.destination}
-													</div>
-												</div>
-												<button
-													type="button"
-													onClick={() => {
-														navigator.clipboard.writeText(r.destination);
-													}}
-													className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex-shrink-0"
-													title="Copy destination URL"
-												>
-													Copy
-												</button>
-											</div>
-										</div>
-
-										<div className="flex justify-end mt-3 pt-3 border-t border-gray-200">
-											<button
-												type="button"
-												onClick={() => handleDelete(r.id)}
-												disabled={deleteMutation.isPending}
-												className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-											>
-												Delete
-											</button>
-										</div>
-									</li>
-								);
-							})}
+							{redirects.map((r) => (
+								<RedirectListItem
+									key={r.id}
+									redirect={r}
+									onUpdate={handleUpdate}
+									onDelete={handleDelete}
+									isUpdating={updateMutation.isPending}
+									isDeleting={deleteMutation.isPending}
+								/>
+							))}
 						</ul>
 					)}
 				</section>
