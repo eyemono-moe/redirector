@@ -1,5 +1,12 @@
-import { defineConfig, presetAttributify, presetUno } from "unocss";
+import presetWind4 from "@unocss/preset-wind4";
+import { defineConfig } from "unocss";
 
 export default defineConfig({
-	presets: [presetUno(), presetAttributify()],
+	presets: [
+		presetWind4({
+			preflights: {
+				reset: true,
+			},
+		}),
+	],
 });

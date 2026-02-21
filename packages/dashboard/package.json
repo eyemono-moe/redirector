@@ -7,23 +7,23 @@
 		"build": "vite build"
 	},
 	"dependencies": {
-		"@clerk/clerk-react": "^5.0.0",
-		"@tanstack/react-query": "^5.90.0",
-		"@tanstack/react-form": "^0.38.0",
-		"@tanstack/valibot-form-adapter": "^0.38.0",
-		"react": "^18.3.0",
-		"react-dom": "^18.3.0",
-		"react-router-dom": "^6.0.0",
-		"valibot": "^1.0.0",
-		"shared": "workspace:*"
+		"@clerk/clerk-react": "^5.61.1",
+		"@tanstack/react-form": "^1.28.3",
+		"@tanstack/react-query": "^5.90.21",
+		"@tanstack/valibot-form-adapter": "^0.42.1",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"react-router-dom": "^7.13.0",
+		"shared": "workspace:*",
+		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"@types/react": "^18.3.0",
-		"@types/react-dom": "^18.3.0",
-		"@unocss/reset": "^0.65.0",
-		"@vitejs/plugin-react": "^4.0.0",
-		"typescript": "^5.0.0",
-		"unocss": "^0.65.0",
-		"vite": "^6.3.5"
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@unocss/preset-wind4": "^66.6.0",
+		"@vitejs/plugin-react": "^5.1.4",
+		"typescript": "^5.9.3",
+		"unocss": "^66.6.0",
+		"vite": "^7.3.1"
 	}
 }
