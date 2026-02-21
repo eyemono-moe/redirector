@@ -171,6 +171,16 @@ export default function Dashboard() {
 								</button>
 							)}
 						</form.Subscribe>
+
+						{createMutation.isError && (
+							<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+								<p className="text-sm text-red-700">
+									{createMutation.error instanceof Error
+										? createMutation.error.message
+										: "Failed to create redirect"}
+								</p>
+							</div>
+						)}
 					</form>
 				</section>
 

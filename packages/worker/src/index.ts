@@ -110,8 +110,8 @@ app.get("/api/redirects", requireAuth, async (c) => {
 	return c.json(entries);
 });
 
-// リダイレクト作成・更新（Valibot バリデーション付き）
-app.put(
+// リダイレクト作成
+app.post(
 	"/api/redirects/:id",
 	requireAuth,
 	sValidator("json", CreateRedirectSchema),
@@ -119,6 +119,17 @@ app.put(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const { destination } = c.req.valid("json");
+
+		// 既存のIDが存在する場合はエラー
+		const existing = await c.env.REDIRECTS.get(id);
+		if (existing) {
+			return c.json(
+				{
+					error: "Conflict: Redirect ID already exists",
+				},
+				409,
+			);
+		}
 
 		await c.env.REDIRECTS.put(id, destination);
 

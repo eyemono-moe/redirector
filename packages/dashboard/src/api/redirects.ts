@@ -15,7 +15,7 @@ export async function createRedirect(
 	data: CreateRedirect,
 ): Promise<Redirect> {
 	const res = await fetch(`${API_BASE}/redirects/${id}`, {
-		method: "PUT",
+		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(data),
 	});
