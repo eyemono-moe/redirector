@@ -13,9 +13,7 @@ import * as v from "valibot";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// ─── Clerk middleware (全体に適用、検証は必要なルートのみ) ───────────────────
 app.use("*", logger());
-app.use("*", clerkMiddleware());
 
 // ─── リダイレクト /:id ───────────────────────────────────────────────────
 app.get("/r/:id", async (c) => {
@@ -36,6 +34,7 @@ app.get("/r/:id", async (c) => {
 });
 
 // ─── 管理 API（Clerk JWT 検証） ──────────────────────────────────────────
+app.use("/api/*", clerkMiddleware());
 
 // ClerkClientをキャッシュ
 let cachedClerkClient: ReturnType<typeof createClerkClient> | null = null;
