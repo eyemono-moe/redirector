@@ -29,6 +29,13 @@ jobs:
       # - name: Run Wrangler type checks
       #   run: pnpm --filter worker exec wrangler types --check
 
+      - name: Run tests
+        run: pnpm test
+        env:
+          CLERK_PUBLISHABLE_KEY: test-key
+          CLERK_SECRET_KEY: test-secret
+          ALLOWED_EMAILS: admin@example.com
+
       - name: Build project
         run: pnpm build
         env:
