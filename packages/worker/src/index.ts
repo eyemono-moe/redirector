@@ -1,5 +1,4 @@
 import { createClerkClient } from "@clerk/backend";
-import type { Fetcher, KVNamespace } from "@cloudflare/workers-types";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { sValidator } from "@hono/standard-validator";
 import { Hono } from "hono";
@@ -12,15 +11,7 @@ import {
 } from "shared/schemas";
 import * as v from "valibot";
 
-type Bindings = {
-	REDIRECTS: KVNamespace;
-	CLERK_PUBLISHABLE_KEY: string;
-	CLERK_SECRET_KEY: string;
-	ALLOWED_EMAILS: string;
-	ASSETS: Fetcher;
-};
-
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Env }>();
 
 // ─── Clerk middleware (全体に適用、検証は必要なルートのみ) ───────────────────
 app.use("*", logger());
@@ -50,7 +41,7 @@ app.get("/r/:id", async (c) => {
 let cachedClerkClient: ReturnType<typeof createClerkClient> | null = null;
 
 // 認証チェックミドルウェア
-const factory = createFactory<{ Bindings: Bindings }>();
+const factory = createFactory<{ Bindings: Env }>();
 const requireAuth = factory.createMiddleware(async (c, next) => {
 	const auth = getAuth(c);
 

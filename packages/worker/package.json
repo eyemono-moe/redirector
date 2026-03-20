@@ -9,14 +9,13 @@
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260228.0",
-		"wrangler": "^4.67.0"
+		"wrangler": "4.76.0"
 	},
 	"name": "worker",
 	"private": true,
 	"scripts": {
 		"build": "wrangler deploy --dry-run --outdir=dist",
-		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"cf-typegen": "wrangler types",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev"
 	},
