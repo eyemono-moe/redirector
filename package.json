@@ -9,6 +9,7 @@
 		"build:dashboard": "pnpm --filter dashboard build",
 		"build": "pnpm build:dashboard && pnpm build:worker",
 		"deploy": "pnpm build && pnpm --filter worker deploy",
+		"check": "biome check .",
 		"fix": "biome check --write ."
 	},
 	"devDependencies": {
