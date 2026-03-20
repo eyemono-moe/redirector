@@ -9,7 +9,7 @@
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"wrangler": "^4.67.0"
+		"wrangler": "4.76.0"
 	},
 	"name": "worker",
 	"private": true,
