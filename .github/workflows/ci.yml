@@ -33,3 +33,11 @@ jobs:
         run: pnpm build
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          CLERK_PUBLISHABLE_KEY: test-key
+          CLERK_SECRET_KEY: test-secret
+          ALLOWED_EMAILS: admin@example.com
+
